@@ -1,47 +1,37 @@
 <?php
-
 session_start();
+require __DIR__ . '/../../vendor/autoload.php';
 
 require_once __DIR__ . '/../service/helpers.php';
 require_once __DIR__ . '/../service/config.php';
 
-$_SESSION['validation'] = [];
+use Palmo\Core\service\Validation;
 
 $login = $_POST['login'] ?? null;
 $email = $_POST['email'] ?? null;
 $password = $_POST['password'] ?? null;
 $secondPassword = $_POST['secondPassword'] ?? null;
 $avatar = $_FILES['avatar'] ?? null;
+$rememberMe = $_POST['rememberMe'] ?? null;
 
 addOldValue('login', $login);
 addOldValue('email', $email);
 
-if (empty($login)) {
-    addValidError('login', 'Неверное имя');
-}
-if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    addValidError('email', 'Неверное поле email');
-}
-if (empty($avatar['size'])) {
-    addValidError('avatar', 'Загрузите фотографию');
-}
-if (empty($password)) {
-    addValidError('password', 'Неверное поле password');
-}
-if (empty($secondPassword)) {
-    addValidError('secondPassword', 'Неверное поле secondPassword');
-} else if ($password !== $secondPassword) {
-    addValidError('password', ' ');
-    addValidError('secondPassword', 'Разные пароли');
-}
-if (!empty($avatar['size'])) {
-    if (($avatar['size'] / 1048576) > 1) {
-        addValidError('avatar', 'Размер фото не должен превышать один мегабайт');
-    }
+
+$_SESSION['validation']['login'] = Validation::valid($login, 'login');
+$_SESSION['validation']['email'] = Validation::valid($email, 'email');
+$_SESSION['validation']['avatar'] = Validation::valid($avatar, 'avatar');
+$_SESSION['validation']['password'] = Validation::valid($password, 'password');
+$_SESSION['validation']['secondPassword'] = Validation::valid($secondPassword, 'password');
+if (!$_SESSION['validation']['password'] && !$_SESSION['validation']['secondPassword']) {
+    $_SESSION['validation']['password'] = Validation::valid([$secondPassword, $password], 'comparePass');
+    $_SESSION['validation']['secondPassword'] = Validation::valid([$secondPassword, $password], 'comparePass');
 }
 
-if (!empty($_SESSION['validation'])) {
-    redirect('/regist');
+foreach ($_SESSION['validation'] as $sessionEl) {
+    if (!empty($sessionEl)) {
+        redirect('/regist');
+    }
 }
 
 $avatarPath = null;
@@ -75,12 +65,43 @@ $stmt = $pdo->prepare($query);
 try {
     $stmt->execute($params);
 } catch (\Exception $e) {
-    die('Ошибка данніх' . $e->getMessage());
+    $_SESSION['validation']['email'] = 'Такой email уже используеться';
+    redirect('/regist');
+    // die('Ошибка данніх' . $e->getMessage());
+}
+
+
+
+if ($rememberMe == 'on') {
+    $token = bin2hex(random_bytes(32));
+    $expiry = time() + 3600 * 24 * 7; // 7 дней
+    setcookie('token', $token, $expiry, '/', '', false, true);
+
+    $sql = "SELECT id FROM users WHERE email = :email";
+    $stmt = $pdo->prepare($sql);
+    $params = ['email' => $email];
+    $stmt->execute($params);
+    $id = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+    $query = "INSERT INTO token (user_id, token) VALUE (:user_id, :token)";
+    $params = [
+        'user_id' => $id['id'],
+        'token' => $token,
+    ];
+    $stmt = $pdo->prepare($query);
+
+    try {
+        $stmt->execute($params);
+    } catch (\Exception $e) {
+        die('Ошибка данных токена' . $e->getMessage());
+    }
+    $_SESSION['user']['id'] = $id['id'];
 }
 
 $_SESSION['user']['name'] = $login;
 $_SESSION['user']['email'] = $email;
 $_SESSION['user']['avatar'] = $avatarPath;
 
-redirect('/');
 
+unset($_SESSION['validation']);
+redirect('/');

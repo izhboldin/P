@@ -1,8 +1,10 @@
 <?php
-session_start();
 
 require_once __DIR__ . '/../scripts/service/helpers.php';
 
+if (isset($_SESSION['user'])) {
+    redirect('notFound');
+}
 ?>
 
 <!DOCTYPE html>
@@ -36,8 +38,13 @@ require_once __DIR__ . '/../scripts/service/helpers.php';
                                     <input type="password" name="password" class="form-control<?php validDangerBorder('password') ?>" maxlength="25">
                                     <small class="text-danger text-center p-0 m-0 "><?php validMessage('password') ?></small>
                                 </div>
+                                <div class="form-check pb-1">
+                                    <input type="checkbox" class="form-check-input" name="rememberMe" id="rememberMe">
+                                    <label for="rememberMe" class="form-check-label">Запомнить меня</label>
+                                </div>
                                 <br>
                                 <a class="btn btn-secondary" href="/">Главная</a>⠀
+                                <a class="btn btn-secondary" href="javascript:history.back()">Назад</a>⠀
                                 <button type="submit" class="btn btn-primary">Войти</button>
                             </form>
                         </div>
@@ -45,8 +52,7 @@ require_once __DIR__ . '/../scripts/service/helpers.php';
                 </div>
             </div>
         </div>
-    </div>
-
+    </div>    
     <script src="../js/bootstrap.min.js"></script>
 </body>
 

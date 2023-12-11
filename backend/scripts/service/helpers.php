@@ -6,11 +6,6 @@ function redirect(string $path)
     die();
 }
 
-function addValidError(string $fieldName, string $message)
-{
-    $_SESSION['validation'][$fieldName] = $message;
-}
-
 function validDangerBorder(string $keyName)
 {
     if (isset($_SESSION['validation'][$keyName])) {
@@ -36,4 +31,14 @@ function getOldValue(string $key)
     unset($_SESSION['oldValue'][$key]);
     return $value;    
 
+}
+
+function mySubString($str, $num): string
+{
+
+    if (strlen($str) < 20) {
+        return $str;
+    } else {
+        return trim(mb_substr($str, 0, $num)) . '...';
+    }
 }

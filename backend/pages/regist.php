@@ -1,8 +1,10 @@
 <?php
-session_start();
 
 require_once __DIR__ . '/../scripts/service/helpers.php';
 
+if (isset($_SESSION['user'])) {
+    redirect('notFound');
+}
 ?>
 
 
@@ -76,8 +78,13 @@ require_once __DIR__ . '/../scripts/service/helpers.php';
                                     >
                                     <small class="text-danger text-center p-0 m-0"><?php validMessage('secondPassword') ?></small>
                                 </div>
+                                <div class="form-check pb-1">
+                                    <input type="checkbox" class="form-check-input" name="rememberMe" id="rememberMe">
+                                    <label for="rememberMe" class="form-check-label">Запомнить меня</label>    
+                                </div>
                                 <br>
                                 <a class="btn btn-secondary" href="/">Главная</a>⠀
+                                <a class="btn btn-secondary" href="javascript:history.back()">Назад</a>⠀
                                 <button type="submit" class="btn btn-primary">Зарегистрироваться</button>⠀
                                 <!-- <button type="submit" class="btn btn-primary">войти с помощью <img style="width: 22px;" src="../assets/Google-logo.png" alt=""></button> -->
                                 <br>
@@ -90,7 +97,8 @@ require_once __DIR__ . '/../scripts/service/helpers.php';
             </div>
         </div>
     </div>
-
+    
+<?php unset($_SESSION['validation']); ?>
 
 
     <script src="../js/bootstrap.min.js"></script>

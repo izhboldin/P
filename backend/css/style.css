@@ -10,13 +10,13 @@ select {
 }
 
 .toggle-button {
-  position: fixed;
-  top: 5px;
-  right: 20px;
+  /* position: fixed; */
+  top: 20px;
+  right: 40px;
   z-index: 999;
 }
 
-:root {
+/* :root {
   --backgound-color: #f8f9fa;
   --backgound-color-inside: #eeeeee;
   --header-background-color: white;
@@ -79,17 +79,11 @@ input::placeholder {
 
 .user-name {
   color: var(--color-text) !important;
-}
+} */
 
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-}
 
 .fon {
-  background-image: url('../assets/back/headerBack.jpg');
+  background-image: url('../assets/back/paper_textur.jpg');
   min-height: 100vh;
   background-position: center;
 }
