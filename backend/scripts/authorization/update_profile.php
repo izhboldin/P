@@ -21,6 +21,7 @@ $name = $_POST['newName'] ?? null;
 $avatar = $_FILES['newAvatar'] ?? null;
 
 if (empty($name) && empty($avatar['size'])) {
+    // redirect('/personalArea');
     $_SESSION['validation']['error'] = 'поля не должныть быть пустыми';
     redirect(rtrim($_SERVER['HTTP_REFERER'], '/'));
 }

@@ -28,24 +28,26 @@ if (!isset($_SESSION['user'])) {
                     <form action="../scripts/authorization/update_profile.php" method="post" class="mb-3">
                         <div class="form-group">
                             <label for="newName">Новое имя:</label>
-                            <input type="text" class="form-control" name="newName" placeholder="Введите новое имя">
+                            <input type="text" class="form-control" name="newName" placeholder="Введите новое имя" value="<?php echo $_SESSION['user']['name'] ?>">
                         </div>
                         <button type="submit" class="btn btn-primary mt-2">Изменить имя</button>
                     </form>
                     <form action="../scripts/authorization/update_profile.php" method="post" class="mb-3" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="newAvatar">Новый аватар (URL):</label>
-                            <input type="file" class="form-control" name="newAvatar" placeholder="Введите URL нового аватара">
+                            <!-- <input type="file" class="form-control" name="newAvatar" placeholder="Введите URL нового аватара" value="../<?php echo $_SESSION['user']['avatar'] ?>"> -->
+                            <input type="file" class="form-control" name="newAvatar" placeholder="Введите URL нового аватара" value="<?php echo base64_encode(file_get_contents($_SESSION['user']['avatar'])); ?>">
                         </div>
                         <button type="submit" class="btn btn-primary mt-2">Изменить аватар</button>
                     </form>
-<?php if(isset($_SESSION['validation']['error'])){
+                    <!-- <?php echo base64_encode(file_get_contents($_SESSION['user']['avatar'])); ?> -->
+                    <?php if (isset($_SESSION['validation']['error'])) {
 
-    echo  '<div class="alert alert-danger p-2" role="alert">
-            <p class="m-0">' . $_SESSION['validation']['error']. '</p>
+                        echo  '<div class="alert alert-danger p-2" role="alert">
+            <p class="m-0">' . $_SESSION['validation']['error'] . '</p>
                 </div>';
-}
-?>
+                    }
+                    ?>
                     <div class="d-flex justify-content-between">
                         <a class="btn btn-outline-dark btn-sm" href="/personalArea">Страница с кабинетом</a>
 
@@ -54,7 +56,7 @@ if (!isset($_SESSION['user'])) {
             </div>
         </div>
     </div>
-    <?php unset($_SESSION['validation']['error']);?>
+    <?php unset($_SESSION['validation']['error']); ?>
     <script src="../js/bootstrap.min.js"></script>
 </body>
 

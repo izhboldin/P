@@ -8,7 +8,8 @@ $search = null;
 $categories = null;
 $sort = null;
 $countBook = 4;
-$allSort = ['Art','Biography','Business','Comics','Computers','Education','Fiction','Language','History','Literary','Medical','Music','Philosophy','Psychology','Politica','Religion','Science','Technology'];
+$pagBtn = 5;
+$allSort = ['Art', 'Biography', 'Business', 'Comics', 'Computers', 'Education', 'Fiction', 'Language', 'History', 'Literary', 'Medical', 'Music', 'Philosophy', 'Psychology', 'Politica', 'Religion', 'Science', 'Technology'];
 
 $pdo = getPDO();
 
@@ -39,10 +40,10 @@ if (isset($_GET['sort'])) {
 // echo "</pre>";
 
 $sql = "SELECT COUNT(DISTINCT id) AS total FROM books WHERE title LIKE :search";
-$params = ['search' => '%'. $search .'%'];
+$params = ['search' => '%' . $search . '%'];
 if (isset($categories) && $categories !== '') {
     $sql .= " AND categories LIKE :categories";
-    $params['categories'] = '%'. $categories . '%';
+    $params['categories'] = '%' . $categories . '%';
 }
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -56,10 +57,10 @@ if ($page < 0 || $page > $pageCount || !is_numeric($page) || (!in_array($categor
 $offset = $countBook * $page;
 
 $sql = "SELECT * FROM books WHERE title LIKE :search";
-$params = ['search' => '%'. $search .'%'];
+$params = ['search' => '%' . $search . '%'];
 if (isset($categories) && $categories !== '') {
     $sql .= " AND categories LIKE :categories";
-    $params['categories'] = '%'. $categories . '%';
+    $params['categories'] = '%' . $categories . '%';
 }
 if (isset($sort) && $sort !== '') {
     $sql .= " ORDER BY $sort";
@@ -70,16 +71,14 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $books = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-$countLike = function ($bookId) use($pdo)
-{
+$countLike = function ($bookId) use ($pdo) {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM favorites_books WHERE book_id = :book_id");
     $params = ['book_id' => $bookId];
     $stmt->execute($params);
     return $stmt->fetchColumn();
 };
 
-$isLike = function ($userId, $bookId) use($pdo)
-{
+$isLike = function ($userId, $bookId) use ($pdo) {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM favorites_books WHERE user_id = :user_id AND book_id = :book_id");
     $params = ['user_id' => $userId, 'book_id' => $bookId];
     $stmt->execute($params);
@@ -108,7 +107,7 @@ $isLike = function ($userId, $bookId) use($pdo)
 
                 <div v-if="true" class="mx-auto" style="width: 50%;">
                     <div class="input-group mb-3">
-                        <input type="text" name="search" class="form-control" placeholder="Введите текст">
+                        <input type="text" name="search" class="form-control" placeholder="Введите текст" value="<?php echo $search ?>">
                         <div class="input-group-append">
                             <button class="btn btn-primary" type="submit">Поиск</button>
                         </div>
@@ -120,6 +119,7 @@ $isLike = function ($userId, $bookId) use($pdo)
                         <div class="form-group">
                             <label for="categories" class=" fw-bold">Категория:</label>
                             <select name="categories" class="form-control">
+                                <!-- multiple -->
                                 <option value="">Все</option>
                                 <option value="Art" <?php echo $categories == 'Art' ? 'selected' : '' ?>>Искусство</option>
                                 <option value="Biography" <?php echo $categories == 'Biography' ? 'selected' : '' ?>>Биография</option>
@@ -158,7 +158,10 @@ $isLike = function ($userId, $bookId) use($pdo)
 
 
         <div class="container card mt-4 book-dody pt-3">
-            <p>Найдено: <?php echo $total ?></p>
+            <div class="d-flex justify-content-between">
+                <p>Найдено: <?php echo $total ?></p>
+                <p class="col-2 text-center">Страница: <?php echo $page + 1  ?></p>
+            </div>
             <?php
             if (isset($books) && !empty($books)) {
                 echo '
@@ -185,21 +188,21 @@ $isLike = function ($userId, $bookId) use($pdo)
                                     <form method="POST" action="scripts/forLibrary/likeBook.php" class="mr-2">
                                         <input type="hidden" name="book_id" value="' . $books[$i]['id'] . '">
                                         <button type="submit" class="btn btn-">';
-                                        if(isset($_SESSION['user'])){
-                                            echo   $isLike($_SESSION['user']['id'],$books[$i]['id']) ?
-                                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="#FF0000">
+                    if (isset($_SESSION['user'])) {
+                        echo   $isLike($_SESSION['user']['id'], $books[$i]['id']) ?
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="#FF0000">
                                             <path d="M12 21.35l-1.45-1.32C5.4 14.25 2 11.36 2 7.5 2 4.42 4.42 2 7.5 2 9.38 2 11.23 3.36 12 4.73 12.77 3.36 14.62 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.86-3.4 6.75-8.55 12.54L12 21.35z" />
                                             </svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#FF0000" stroke-width="2">
                                             <path d="M12 21.35l-1.45-1.32C5.4 14.25 2 11.36 2 7.5 2 4.42 4.42 2 7.5 2 9.38 2 11.23 3.36 12 4.73 12.77 3.36 14.62 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.86-3.4 6.75-8.55 12.54L12 21.35z" />
                                             </svg>';
-                                        }else{
-                                            echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#FF0000" stroke-width="2">
+                    } else {
+                        echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#FF0000" stroke-width="2">
                                             <path d="M12 21.35l-1.45-1.32C5.4 14.25 2 11.36 2 7.5 2 4.42 4.42 2 7.5 2 9.38 2 11.23 3.36 12 4.73 12.77 3.36 14.62 2 16.5 2 19.58 2 22 4.42 22 7.5c0 3.86-3.4 6.75-8.55 12.54L12 21.35z" />
                                             </svg>';
-                                        }
-                                            
-                                           echo '</button>
-                                            <span>'. $countLike($books[$i]['id']).'</span>
+                    }
+
+                    echo '</button>
+                                            <span>' . $countLike($books[$i]['id']) . '</span>
                                     </form>
                                     <a class="btn btn-info" href="/aboutBook?id=' . $books[$i]['id'] . '">Подробнее</a>
                                 </div>
@@ -213,10 +216,30 @@ $isLike = function ($userId, $bookId) use($pdo)
                 echo '<p class="p-4 text-center">По такому запросу ничего не найдено</p>';
             }
             ?>
-            <div class="row justify-content-evenly mb-3">
-                <a class="col-2 btn btn-warning <?php echo $page == 0 ? 'disabled' : '' ?>" href="/search?page=<?php echo $page - 1 ?>&search=<?php echo $search ?>&categories=<?php echo $categories ?>&sort=<?php echo $sort ?>">Назад</a>
-                <p class="col-2 text-center">Страница: <?php echo $page + 1  ?></p>
-                <a class="col-2 btn btn-warning <?php echo $pageCount - 1 <= $page ? 'disabled' : '' ?>" href="/search?page=<?php echo $page + 1 ?>&search=<?php echo $search ?>&categories=<?php echo $categories ?>&sort=<?php echo $sort ?>">Далее</a>
+            <div class="d-flex justify-content-center mb-3">
+                <?php
+                if($page > 2){
+                    echo '<a class="btn btn-light border mx-5" href="/search?page=0&search=' . $search . '&categories=' . $categories . '&sort=' . $sort . '">1</a>';
+                }
+                for ($i = 1; $i <= $pagBtn; $i++) {
+                    if (($page + $i - 3) < 0) {
+                        $pagBtn++;
+                        continue;
+                    }
+
+                    if ($pageCount <= ($page + $i - 3)) {
+                        break;
+                    }
+                    if (($page + $i - 3) == $page) {
+                        echo '<a class="btn btn-primary border mx-2" href="/search?page=' . $page + $i - 3 . '&search=' . $search . '&categories=' . $categories . '&sort=' . $sort . '">' . $page + $i - 2 . '</a>';
+                    } else {
+                        echo '<a class="btn btn-light border mx-2" href="/search?page=' . $page + $i - 3 . '&search=' . $search . '&categories=' . $categories . '&sort=' . $sort . '">' . $page + $i - 2 . '</a>';
+                    }
+                }
+                if($page < $pageCount - 3){
+                    echo '<a class="btn btn-light border mx-5" href="/search?page='. $pageCount - 1 .'&search=' . $search . '&categories=' . $categories . '&sort=' . $sort . '">'. $pageCount .'</a>';
+                }
+                ?>
             </div>
         </div>
     </div>

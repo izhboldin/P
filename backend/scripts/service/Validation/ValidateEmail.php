@@ -13,6 +13,7 @@ class ValidateEmail implements ValidInterface
     {
         $result = match (true) {
             CommonValidation::isEmpty(trim($data)) => "Поле 'Email' не должно быть пустым",
+            CommonValidation::searchTeg(trim($data)) => "Поле 'Email' не должно иметь HTML теги",
             self::isEmail($data) => "Проверьте поле 'Email'",
             default => null
         };

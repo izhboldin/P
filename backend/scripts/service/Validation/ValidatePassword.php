@@ -18,6 +18,7 @@ class ValidatePassword implements ValidInterface
     {
         $result = match (true) {
             self::isEmpty($data) => "Пароль не должно быть пустым",
+            self::searchTeg(trim($data)) => "Поле 'Пароль' не должно иметь HTML теги",
             self::minLength($data, 6) => "Пароль не должно быть меньше 6 символов",
             self::maxLength($data, 30) => "Пароль не должно быть больше 30 символов",
             self::validPass($data) => "Пароль должен содержать хотя бы одну цифру и букву",
